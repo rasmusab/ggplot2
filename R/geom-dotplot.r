@@ -152,7 +152,7 @@ GeomDotplot <- proto(Geom, {
       params$width %||% (resolution(df$x, FALSE) * 0.9)
 
     # Set up the stacking function and range
-    if(params$stackdir == "up") {
+    if(is.null(params$stackdir) || params$stackdir == "up") {
       stackdots <- function(a)  a - .5
       stackaxismin <- 0
       stackaxismax <- 1
@@ -176,8 +176,13 @@ GeomDotplot <- proto(Geom, {
 
     # Next part will set the position of each dot within each stack
     # If stackgroups=TRUE, split only on x (or y) and panel; if not stacking, also split by group
-    plyvars <- c(params$binaxis, "PANEL")
-    if (!params$stackgroups)
+    if(is.null(params$binaxis)) {
+      plyvars <- "x"
+    } else {
+      plyvars <- params$binaxis
+    }
+    plyvars <- c(plyvars, "PANEL")
+    if (is.null(params$stackgroups) || !params$stackgroups)
       plyvars <- c(plyvars, "group")
 
     # Within each x, or x+group, set countidx=1,2,3, and set stackpos according to stack function
@@ -189,7 +194,7 @@ GeomDotplot <- proto(Geom, {
 
 
     # Set the bounding boxes for the dots
-    if (params$binaxis == "x") {
+    if (is.null(params$binaxis) || params$binaxis == "x") {
       # ymin, ymax, xmin, and xmax define the bounding rectangle for each stack
       # Can't do bounding box per dot, because y position isn't real.
       # After position code is rewritten, each dot should have its own bounding box.
